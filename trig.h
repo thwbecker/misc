@@ -1,0 +1,14 @@
+#ifndef PIOVERONEEIGHTY
+#define PIOVERONEEIGHTY 0.0174532925199433
+#endif
+#ifndef DEG2RAD
+#define DEG2RAD(x) ( (x)*PIOVERONEEIGHTY )
+#endif
+#ifndef PIHALF
+#define PIHALF 1.5707963267948966
+#endif
+
+#ifndef RADIUS_EARTH_KM
+#define RADIUS_EARTH_KM 6371.0
+#endif
+
