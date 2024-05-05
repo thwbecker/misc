@@ -4,6 +4,9 @@
   Recipes routines to determine optimal lag (there's also a
   time-dependent correlation cross_correlate_window)
 
+  this assumes samples equidistant in time and available for both time
+  series
+
 
   $Id: correl.c,v 1.1 2005/02/11 23:17:57 becker Exp $ 
 
@@ -20,15 +23,15 @@ int main(int argc, char **argv)
   corr=(double *)malloc(sizeof(double));
 
   while(fscanf(stdin,"%lf %lf",(x+n),(y+n))==2){
-    n++;n1++;
-    x=(double *)realloc(x,sizeof(double)*n1);
-    y=(double *)realloc(y,sizeof(double)*n1);
-    if(!x || !y)ME;
+    if(finite(x[n])&&finite(y[n])){
+      n++;n1++;
+      x=(double *)realloc(x,sizeof(double)*n1);
+      y=(double *)realloc(y,sizeof(double)*n1);
+      if(!x || !y)ME;
+    }
   }
-  fprintf(stderr,"%s: reading %i data pairs from stdin\n",
-	  argv[0],n); 
-
-  
+  fprintf(stderr,"%s: read %i non-nan data pairs from stdin\n",argv[0],n); 
+  /* compute all correlation with different lags */
   compute_correl(&x,&y,&corr,n,&nn);
 
   mlag = nn/2;

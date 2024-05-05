@@ -27,9 +27,12 @@ int main(int argc,char **argv)
     sscanf(argv[3],"%lf",&window_length);
   if(argc>=5)			/* resampling factor */
     sscanf(argv[4],"%lf",&rfac);
-  if(rfac>1){
+  if(rfac<1){
     fprintf(stderr,"%s: WARNING: sampling larger than unity?! %g\n",argv[0],rfac);
   }
+  /* 
+     read in two files and interpolate if needed 
+  */
   read_two_files_and_interpolate(&t,&y1, &y2,&n,rfac,(argv+1));
   if(window_length < 0){		/* provided as actual time */
     fprintf(stderr,"%s: window length desired in actual time: %g\n",argv[0],-window_length);
@@ -51,7 +54,7 @@ int main(int argc,char **argv)
   imin = il+nr2;imax = n - nr2;
   for(i=imin;i < imax;i++,il++){
     /* time correlation y1_int y2_int */
-    printf("%20.7e %20.15f\t %g %g\n",
+    printf("%20.7e %20.15f\t%g %g\n",
 	   t[i],correlation((y1+i-nr2),(y2+i-nr2),nr),y1[i],y2[i]);
   }
   free(t);

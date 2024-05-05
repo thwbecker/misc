@@ -83,12 +83,14 @@ int read_two_files_and_interpolate(COMP_PRECISION **ti,COMP_PRECISION **y1, COMP
   if(!(*y1) || !(*y2) || !(*ti))MEMERROR;
   yi[0] = *y1;yi[1] = *y2;
 
+  tloc = tmin;
   for(i=0;i < 2;i++){
-    tloc = tmin;
     for(j=0;j < *n;j++){
-      *ti[i] = tloc;
-      *(yi[i]+j) = interpolate(t[i],y[i],n0[i],tloc);
-      tloc += dt;
+      if(i==0){
+	*(*ti+j) = tloc;
+	tloc += dt;
+      }
+      *(yi[i]+j) = interpolate(t[i],y[i],n0[i],*(*ti+j));
     }
   }
   tloc -= dt;
