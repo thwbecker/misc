@@ -110,9 +110,7 @@ int main(int argc,char **argv)
     for(i=0;i<n;i++){
       c_eq_a_minus_b_3d(nx,(x+n*3),mx);
       fprintf(stdout,"%12.3e %12.3e %12.3e\n",
-	      project_vector(nx,t_strike),
-	      project_vector(nx,t_dip),
-	      project_vector(nx,normal));
+	      dotp_3d(nx,t_strike),dotp_3d(nx,t_dip),dotp_3d(nx,normal));
     }
     break;
   default:
