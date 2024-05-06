@@ -6,7 +6,7 @@
 
 /* 
 
-   cross correlation offset
+   cross correlation as a function of offset
 
  */
 
@@ -14,9 +14,9 @@
 int main(int argc,char **argv)
 {
   COMP_PRECISION *t=NULL,*y1=NULL,*y2=NULL,*corr=NULL;
-  COMP_PRECISION dt,corr_max,tcorr_max,rs,rsa;
+  COMP_PRECISION dt,corr_max,tcorr_max;
   int i,j,n,nn,mlag;
-  COMP_PRECISION rfac = 2;	/* subsample with 1/rfac  */
+  COMP_PRECISION rfac = 1;	/* subsample with 1/rfac  */
 
   if(argc < 3){
     fprintf(stderr,"%s file1 file2 [rfac, %g]\nreads in two x-y datafiles and computes cross-correlation as function of offset\n",
@@ -31,29 +31,19 @@ int main(int argc,char **argv)
  
   read_two_files_and_interpolate(&t,&y1, &y2,&n,rfac,(argv+1));
   dt=t[1]-t[0];
-  compute_correl(&y1,&y2,&corr,n,&nn);
-  corr_max=-1e20;
+  compute_correl(y1,y2,&corr,n,&nn,1);
+
+  find_max_from_nr_corr(corr,nn,dt,&tcorr_max,&corr_max);
+  fprintf(stderr,"%s: max |r| correlation %g at t %g\n",argv[0],corr_max,tcorr_max);
   
   mlag = nn/2;
   for(j=mlag,i= -mlag;j < nn;j++,i++){
-    rs = corr[j]/(COMP_PRECISION)mlag;
-    printf("%g %g\n",i*dt,rs);// negative lags
-    rsa = fabs(rs);
-    if(rsa > corr_max){
-      corr_max = rsa;
-      tcorr_max = i*dt;
-    }
+    printf("%g %g\n",i*dt,corr[j]);// negative lags
   }
   for(i=0;i <= mlag;i++){
-    rs = corr[i]/(COMP_PRECISION)mlag;
-    printf("%g %g\n",i*dt,rs);// positive lags
-    rsa = fabs(rs);
-    if(rsa > corr_max){
-      corr_max = rsa;
-      tcorr_max = i*dt;
-    }
+    printf("%g %g\n",i*dt,corr[i]);// positive lags
   }
-  fprintf(stderr,"%s: max |r| correlation %g at t %g\n",argv[0],corr_max,tcorr_max);
+
   free(t);
   free(y1);
   free(y2);

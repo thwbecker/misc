@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "correlation.h"
+#include "correl_nr.h"
 /* 
 
    moving window cross correlation
@@ -11,10 +12,10 @@
 
 int main(int argc,char **argv)
 {
-  COMP_PRECISION *t=NULL,*y1=NULL,*y2=NULL;
-  int i,n,nr,nr2,il,imin,imax;
+  COMP_PRECISION *t=NULL,*y1=NULL,*y2=NULL,tcorr,tcorr_max,corr_max,*corr=NULL,dt;
+  int i,n,nr,nr2,il,imin,imax,nn;
   COMP_PRECISION window_length = 0.2;	/* window length  */
-  COMP_PRECISION rfac = 2;	/* subsample with 1/rfac  */
+  COMP_PRECISION rfac = 1;	/* subsample with 1/rfac  */
   
   if(argc < 3){
     fprintf(stderr,"%s file1 file2 [wl, %g] [rfac, %g]\nreads in two x-y datafiles and computes moving window (fraction wl) cross correlation\n\tresampling at dtmin/rfac\n",
@@ -47,15 +48,20 @@ int main(int argc,char **argv)
   if(nr%2!=0)
     nr++;
 
- 
+  dt = t[1]-t[0];
   /* output */
   nr2 = nr/2;
   il = 0;
   imin = il+nr2;imax = n - nr2;
   for(i=imin;i < imax;i++,il++){
     /* time correlation y1_int y2_int */
-    printf("%20.7e %20.15f\t%g %g\n",
-	   t[i],correlation((y1+i-nr2),(y2+i-nr2),nr),y1[i],y2[i]);
+    tcorr = correlation((y1+i-nr2),(y2+i-nr2),nr);
+    
+    compute_correl((y1+i-nr2),(y2+i-nr2),&corr,nr,&nn,0);
+    find_max_from_nr_corr(corr,nn,dt,&tcorr_max,&corr_max);
+    
+    printf("%20.7e\t%20.7f\t%g %g\t\t%20.7e %20.7e\n",
+	   t[i],tcorr,tcorr_max,corr_max,y1[i],y2[i]);
   }
   free(t);
   free(y1);

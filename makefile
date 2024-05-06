@@ -405,8 +405,8 @@ $(BDIR)/crosscorrelate_delay: $(ODIR)/correl_nr_util.o $(ODIR)/crosscorrelate_de
 	$(CC) $(CFLAGS) $(ODIR)/correl_nr_util.o $(ODIR)/crosscorrelate_delay.o $(ODIR)/correl_util.o  \
 	-o $(BDIR)/crosscorrelate_delay $(LDFLAGS)
 
-$(BDIR)/crosscorrelate_window: $(ODIR)/crosscorrelate_window.o $(ODIR)/correl_util.o
-	$(CC) $(CFLAGS)  $(ODIR)/crosscorrelate_window.o $(ODIR)/correl_util.o  \
+$(BDIR)/crosscorrelate_window: $(ODIR)/crosscorrelate_window.o $(ODIR)/correl_nr_util.o $(ODIR)/correl_util.o
+	$(CC) $(CFLAGS)  $(ODIR)/crosscorrelate_window.o $(ODIR)/correl_util.o $(ODIR)/correl_nr_util.o \
 	-o $(BDIR)/crosscorrelate_window $(LDFLAGS)
 
 $(BDIR)/gpoints: gpoints.c

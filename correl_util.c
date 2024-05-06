@@ -153,3 +153,28 @@ COMP_PRECISION correlation(COMP_PRECISION *x, COMP_PRECISION *y, int n)
   }
   return sxy/sqrt(sxx*syy);
 }
+
+void find_max_from_nr_corr(COMP_PRECISION *corr,int nn,COMP_PRECISION dt,COMP_PRECISION *tcmax,COMP_PRECISION *ramax)
+{
+  int mlag,i,j;
+  COMP_PRECISION rsa;
+  mlag = nn/2;
+  *ramax = -1e20;
+  *tcmax = 0;
+  
+  for(j=mlag,i= -mlag;j < nn;j++,i++){
+    rsa = fabs(corr[j]);
+    if(rsa > *ramax){
+      *ramax = rsa;
+      *tcmax = (double)i;
+    }
+  }
+  for(i=0;i <= mlag;i++){
+    rsa = fabs(corr[i]);
+    if(rsa > *ramax){
+      *ramax = rsa;
+      *tcmax = (double)i;
+    }
+  }
+  *tcmax *= dt;
+}

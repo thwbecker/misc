@@ -16,11 +16,10 @@
 int main(int argc, char **argv)
 {
   int i,j,n,n1,nn,mlag;
-  double *x,*y,*corr;
+  double *x,*y,*corr=NULL;
   n=0;n1=1;
   x=(double *)malloc(sizeof(double));
   y=(double *)malloc(sizeof(double));
-  corr=(double *)malloc(sizeof(double));
 
   while(fscanf(stdin,"%lf %lf",(x+n),(y+n))==2){
     if(finite(x[n])&&finite(y[n])){
@@ -32,13 +31,14 @@ int main(int argc, char **argv)
   }
   fprintf(stderr,"%s: read %i non-nan data pairs from stdin\n",argv[0],n); 
   /* compute all correlation with different lags */
-  compute_correl(&x,&y,&corr,n,&nn);
+  compute_correl(x,y,&corr,n,&nn,1);
 
   mlag = nn/2;
   for(j=mlag,i=-mlag;j<nn;j++,i++)
     printf("%i %g\n",i,corr[j]);// negative lags
   for(i=0;i<=mlag;i++)
     printf("%i %g\n",i,corr[i]);// positive lags
+
   free(x);free(y);free(corr);
   return 0;
 }

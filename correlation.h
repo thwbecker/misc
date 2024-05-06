@@ -14,5 +14,6 @@ COMP_PRECISION interpolate(COMP_PRECISION *, COMP_PRECISION *,int , COMP_PRECISI
 COMP_PRECISION correlation(COMP_PRECISION *,COMP_PRECISION *,int );
 int read_two_files_and_interpolate(COMP_PRECISION **,COMP_PRECISION **, COMP_PRECISION **,
 				   int *,COMP_PRECISION ,char **);
+void find_max_from_nr_corr(COMP_PRECISION *,int ,COMP_PRECISION ,COMP_PRECISION *,COMP_PRECISION *);
 
 

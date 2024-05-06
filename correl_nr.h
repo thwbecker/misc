@@ -10,7 +10,7 @@ void realft(double *,int ,int );
 void four1(double *,int ,int );
 void correl(double *,double *,int ,double *);
 void twofft(double *,double *,double *,double *,int );
-void compute_correl(double **, double **, double **, int, int *);
+void compute_correl(double *, double *, double **, int, int *,int);
 
 #define ME {fprintf(stderr,"memory error\n");exit(-1);}
 #define INVERSE_LN_TWO  1.44269504088896341
