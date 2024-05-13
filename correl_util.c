@@ -1,9 +1,76 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include "correlation.h"
+#include "correl_nr.h"
 
+/* mode = 2: Pearson 3: spearman  */
+void calc_lag_corr_pedestrian(COMP_PRECISION *x,COMP_PRECISION *y,
+			      COMP_PRECISION **corr,int n,int *nc,
+			      int mode)
+{
+  int j,i,remove_mean_in_corr;
+  COMP_PRECISION *xc, *yc,xm,ym,xs,ys,fac;
+  COMP_PRECISION d,zd,rs,probd,probrs;
+  remove_mean_in_corr = 1;	/* 0: remove here, and then don't in
+				   corr, 1: remove for all
+				   sequences */
+  
+  if(n%2==0)
+    j = n/2;
+  else
+    j = (n-1)/2;
+  
+  *nc = j*2;
+  *corr = (COMP_PRECISION *)realloc(*corr,sizeof(COMP_PRECISION)*(*nc));
+  for(i=0;i< *nc;i++)
+    *(*corr+i) = 0;
 
+  if(remove_mean_in_corr == 1){
+    xc = x;
+    yc = y;
+  }else{
+    xc = (COMP_PRECISION *)malloc(sizeof(COMP_PRECISION)*n);
+    yc = (COMP_PRECISION *)malloc(sizeof(COMP_PRECISION)*n); 
+  
+    /* remove and scale onces */
+    xm = xs = ym = ys = 0.0;
+    for(i=0;i<n;i++){
+      xm += x[i];
+      ym += y[i];
+    }
+    xm /= (COMP_PRECISION)n;
+    ym /= (COMP_PRECISION)n;
+    for(i=0;i<n;i++){
+      fac = x[i] - xm;fac *= fac;
+      xs += fac;
+      fac = y[i] - ym;fac *= fac;
+      ys += fac;
+    }
+    xs = sqrt(xs/((COMP_PRECISION)n-1.));
+    ys = sqrt(ys/((COMP_PRECISION)n-1.));
+    for(i=0;i<n;i++){		/* rescaled */
+      xc[i] = (x[i]-xm)/xs;
+      yc[i] = (y[i]-ym)/ys;
+    }
+  }
+  if(mode == 2){		/* Pearson */
+    for(i=0;i < j;i++)
+      *(*corr+j+i) = correlation((xc+i),(yc),  n-i,remove_mean_in_corr);
+    for(i=1;i <= j;i++)
+      *(*corr+j-i) = correlation(xc,    (yc+i),n-i,remove_mean_in_corr);
+  }else{			/* spearman */
+    for(i=0;i < j;i++){
+      spear ((xc+i-1),(yc-1),(unsigned long)(n-i),&d,&zd, &probd, &rs,&probrs);
+      *(*corr+j+i) = rs;
+    }
+    for(i=1;i <= j;i++){
+      spear ((xc-1), (yc+i-1),(unsigned long)(n-i),&d,&zd, &probd, &rs,&probrs);
+      *(*corr+j-i) = rs;
+    }
+  }
+  if(!remove_mean_in_corr){
+    free(xc);free(yc);
+  }
+  
+}
 
 int read_two_files_and_interpolate(COMP_PRECISION **ti,COMP_PRECISION **y1, COMP_PRECISION **y2,
 				   int *n,COMP_PRECISION rfac,char **filename)
@@ -131,49 +198,57 @@ COMP_PRECISION interpolate(COMP_PRECISION *x, COMP_PRECISION *y,int n, COMP_PREC
   return val;
 
 }
-
-COMP_PRECISION correlation(COMP_PRECISION *x, COMP_PRECISION *y, int n)
+/* pearson correlation with or without removal of mean */
+COMP_PRECISION correlation(COMP_PRECISION *x, COMP_PRECISION *y, int n, int remove_mean)
 {
   int j;
-  COMP_PRECISION yt,xt;
-  COMP_PRECISION syy=0.0,sxy=0.0,sxx=0.0,ay=0.0,ax=0.0;
-  
-  for (j=0;j<n;j++) {
-    ax += x[j];
-    ay += y[j];
+  double yt,xt;
+  double syy=0.0,sxy=0.0,sxx=0.0,ay=0.0,ax=0.0;
+  if(remove_mean){
+    for (j=0;j<n;j++) {
+      ax += (double)x[j];
+      ay += (double)y[j];
+    }
+    ax /= (double)n;
+    ay /= (double)n;
   }
-  ax /= (COMP_PRECISION)n;
-  ay /= (COMP_PRECISION)n;
   for (j=0;j<n;j++) {
-    xt=x[j]-ax;
-    yt=y[j]-ay;
+    xt=(double)x[j]-ax;
+    yt=(double)y[j]-ay;
     sxx += xt*xt;
     syy += yt*yt;
     sxy += xt*yt;
   }
-  return sxy/sqrt(sxx*syy);
+  return (COMP_PRECISION)((double)sxy/sqrt((double)sxx*(double)syy));
 }
 
-void find_max_from_nr_corr(COMP_PRECISION *corr,int nn,COMP_PRECISION dt,COMP_PRECISION *tcmax,COMP_PRECISION *ramax)
+void find_max_from_nr_corr(COMP_PRECISION *corr,int nn,COMP_PRECISION dt,
+			   COMP_PRECISION *tcmax,COMP_PRECISION *ramax, int mode)
 {
   int mlag,i,j;
-  COMP_PRECISION rsa;
   mlag = nn/2;
   *ramax = -1e20;
   *tcmax = 0;
-  
-  for(j=mlag,i= -mlag;j < nn;j++,i++){
-    rsa = fabs(corr[j]);
-    if(rsa > *ramax){
-      *ramax = rsa;
-      *tcmax = (double)i;
+  if(mode == 1){		/* based on FFT */
+    for(j=mlag,i= -mlag;j < nn;j++,i++){
+      if(corr[j] > *ramax){
+	*ramax = corr[j];
+	*tcmax = (double)i;
+      }
     }
-  }
-  for(i=0;i <= mlag;i++){
-    rsa = fabs(corr[i]);
-    if(rsa > *ramax){
-      *ramax = rsa;
-      *tcmax = (double)i;
+    for(i=0;i <= mlag;i++){
+      if(corr[i] > *ramax){
+	*ramax = corr[i];
+	*tcmax = (double)i;
+      }
+    }
+  }else{
+    /* based on my computations */
+    for(j=-mlag,i=0;i < nn;i++,j++){
+      if(corr[i] > *ramax){
+	*ramax = corr[i];
+	*tcmax = (double)j;
+      }
     }
   }
   *tcmax *= dt;

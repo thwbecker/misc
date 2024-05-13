@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include "correl_nr.h"
+
 /* 
 
    compute a correlation using Spearman's rank
@@ -8,12 +7,12 @@
    $Id: spear.c,v 1.1 2009/04/10 17:19:20 becker Exp becker $
 
 */
-void spear(float [], float [], unsigned long, float *, float *, float *, float *, float *);
+#define COMP_PRECISION double
 
 
 int main(int argc, char **argv)
 {
-  float *x=NULL,*y=NULL,d,zd,rs,probd,probrs;
+  COMP_PRECISION *x=NULL,*y=NULL,d,zd,rs,probd,probrs;
   int n,skipped;
   if(argc != 1){
     fprintf(stderr,"%s\n\n\treads x y pairs from stdin and computes the Spearman rank correlation\n",
@@ -22,13 +21,13 @@ int main(int argc, char **argv)
   }
 
   n=skipped=0;
-  x = (float *)realloc(x,sizeof(float));
-  y = (float *)realloc(y,sizeof(float));
-  while(fscanf(stdin,"%f %f",(x+n),(y+n))==2){
+  x = (COMP_PRECISION *)realloc(x,sizeof(COMP_PRECISION));
+  y = (COMP_PRECISION *)realloc(y,sizeof(COMP_PRECISION));
+  while(fscanf(stdin,"%lf %lf",(x+n),(y+n))==2){
     if(finite(x[n])&&(finite(y[n]))){
       n++;
-      x = (float *)realloc(x,sizeof(float)*(n+1));
-      y = (float *)realloc(y,sizeof(float)*(n+1));
+      x = (COMP_PRECISION *)realloc(x,sizeof(COMP_PRECISION)*(n+1));
+      y = (COMP_PRECISION *)realloc(y,sizeof(COMP_PRECISION)*(n+1));
     }else{
       skipped++;
     }

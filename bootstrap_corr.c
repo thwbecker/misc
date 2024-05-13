@@ -1,12 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-float corr(float *,float *, int );
-void replicate(float *, float *, float *, float *, int , long  *,int, int *); /*  */
-float ran3(long *);
+#include "correl_nr.h"
+#define COMP_PRECISION double
+
+COMP_PRECISION corr(COMP_PRECISION *,COMP_PRECISION *, int );
+void replicate(COMP_PRECISION *, COMP_PRECISION *, COMP_PRECISION *, COMP_PRECISION *, int , long  *,int, int *); /*  */
+COMP_PRECISION ran3(long *);
 int random_int(long *, int );
-void spear(float [], float [], unsigned long, float *, float *, float *, float *, float *);
-void calc_avg(float *dx,float *,int ,float *, float *,int,long int *);
+
+void calc_avg(COMP_PRECISION *dx,COMP_PRECISION *,int ,COMP_PRECISION *, COMP_PRECISION *,int,long int *);
 
 /* 
    
@@ -19,21 +19,21 @@ int main(int argc, char **argv)
 {
   int n;
   long int seed = -1;
-  float *x, *y;
-  float mean, std;
+  COMP_PRECISION *x, *y;
+  COMP_PRECISION mean, std;
   
   /* init */
   ran3(&seed);
   /* allocate */
 
-  x=(float *)malloc(sizeof(float));
-  y=(float *)malloc(sizeof(float));
+  x=(COMP_PRECISION *)malloc(sizeof(COMP_PRECISION));
+  y=(COMP_PRECISION *)malloc(sizeof(COMP_PRECISION));
   /* read in */
   n=0;
-  while(fscanf(stdin,"%f %f",(x+n),(y+n))==2){
+  while(fscanf(stdin,"%lf %lf",(x+n),(y+n))==2){
     n++;
-    x=(float *)realloc(x,(n+1)*sizeof(float));
-    y=(float *)realloc(y,(n+1)*sizeof(float));
+    x=(COMP_PRECISION *)realloc(x,(n+1)*sizeof(COMP_PRECISION));
+    y=(COMP_PRECISION *)realloc(y,(n+1)*sizeof(COMP_PRECISION));
   }
 #ifdef USE_PEARSON
   fprintf(stderr,"%s: read %i samples for Pearson correlation\n",argv[0],n);
@@ -55,16 +55,16 @@ int main(int argc, char **argv)
    2: bootstrap (usually, good)
 
  */
-void calc_avg(float *x,float *y,int n,float *gmean,float *std,int mode,long int *seed)
+void calc_avg(COMP_PRECISION *x,COMP_PRECISION *y,int n,COMP_PRECISION *gmean,COMP_PRECISION *std,int mode,long int *seed)
 {
   double sum,mean;
   int nused,nrep,i,nnew;
-  float *rx,*ry;
-  float d,zd,probd,probrs,rtmp;
+  COMP_PRECISION *rx,*ry;
+  COMP_PRECISION d,zd,probd,probrs,rtmp;
   double *r;
   /* for replication */
-  rx=(float *)malloc(n*sizeof(float));
-  ry=(float *)malloc(n*sizeof(float));
+  rx=(COMP_PRECISION *)malloc(n*sizeof(COMP_PRECISION));
+  ry=(COMP_PRECISION *)malloc(n*sizeof(COMP_PRECISION));
   
   if(mode==1){			/* jacknife */
     nrep = n;
@@ -97,7 +97,7 @@ void calc_avg(float *x,float *y,int n,float *gmean,float *std,int mode,long int 
     }
   }
   mean = sum / (double)nused;
-  *gmean = (float)mean;
+  *gmean = (COMP_PRECISION)mean;
   
   sum = 0;
   for(i=0;i < nused;i++){
@@ -106,7 +106,7 @@ void calc_avg(float *x,float *y,int n,float *gmean,float *std,int mode,long int 
   }
 
 
-  *std = (float)sqrt(sum/((double)(nused-1)));
+  *std = (COMP_PRECISION)sqrt(sum/((double)(nused-1)));
 
   free(rx);free(ry);free(r);
 }
@@ -116,7 +116,7 @@ void calc_avg(float *x,float *y,int n,float *gmean,float *std,int mode,long int 
    2: take out one random sample
    
 */
-void replicate(float *x, float *y, float *rx, float *ry, int n, long *seed,
+void replicate(COMP_PRECISION *x, COMP_PRECISION *y, COMP_PRECISION *rx, COMP_PRECISION *ry, int n, long *seed,
 	       int mode,int *nnew)
 {
   int i,j,omit;
@@ -159,9 +159,9 @@ void replicate(float *x, float *y, float *rx, float *ry, int n, long *seed,
   //fprintf(stderr,"\n");
 }
 
-float corr(float *x,float *y, int n)
+COMP_PRECISION corr(COMP_PRECISION *x,COMP_PRECISION *y, int n)
 {
-  float mx,my,s1,s2,s3,tmp,dx,dy;
+  COMP_PRECISION mx,my,s1,s2,s3,tmp,dx,dy;
   int i;
   mx=0.0;
   my=0.0;
@@ -169,8 +169,8 @@ float corr(float *x,float *y, int n)
     mx += x[i];
     my += y[i];
   }
-  mx /= (float)n;
-  my /= (float)n;
+  mx /= (COMP_PRECISION)n;
+  my /= (COMP_PRECISION)n;
   s1=s2=s3=0.0;
   for(i=0;i<n;i++){
     dx = x[i] - mx;
@@ -189,7 +189,7 @@ float corr(float *x,float *y, int n)
 #define MZ 0
 #define FAC (1.0/MBIG)
 
-float ran3(long *idum)
+COMP_PRECISION ran3(long *idum)
 {
   static int inext,inextp;
   static long ma[56];
@@ -236,8 +236,8 @@ int random_int(long  *seed, int n)
 {
   int j;
   j=0;
-  j = (int)(ran3(seed)*(float)n);
-  //fprintf(stderr,"%i %g\n",j,(float)j/(float)(n-1));
+  j = (int)(ran3(seed)*(COMP_PRECISION)n);
+  //fprintf(stderr,"%i %g\n",j,(COMP_PRECISION)j/(COMP_PRECISION)(n-1));
   if(j==n)
     j--;
   return j;
