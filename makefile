@@ -79,7 +79,7 @@ PROGS2 = \
 	$(BDIR)/lonlat2gcpoints $(BDIR)/lonlatzcv2pv \
 	$(BDIR)/gifmerge $(BDIR)/median	$(BDIR)/svdfit $(BDIR)/momt_project \
 	$(BDIR)/pca $(BDIR)/polyfit $(BDIR)/plume_detect  $(BDIR)/plume_detect_d \
-	$(BDIR)/paste_bin $(BDIR)/dist_on_sphere_and_azi \
+	$(BDIR)/paste_bin $(BDIR)/dist_on_sphere_and_azi $(BDIR)/dist_on_sphere_and_azi_file \
 	$(BDIR)/cholesky_lsq $(BDIR)/svd_lsq $(BDIR)/svd_lsq_s $(BDIR)/ftest  
 #	$(BDIR)/solve_hom3d 
 #	$(BDIR)/iaspei91 $(BDIR)/mpi_example
@@ -349,6 +349,10 @@ $(BDIR)/dist_on_sphere_and_azi: dist_on_sphere_and_azi.c $(ODIR)/stadis.o
 	$(CC) $(CFLAGS) dist_on_sphere_and_azi.c $(ODIR)/stadis.o \
 	-o $(BDIR)/dist_on_sphere_and_azi $(LDFLAGS)
 
+$(BDIR)/dist_on_sphere_and_azi_file: dist_on_sphere_and_azi_file.c $(ODIR)/stadis.o
+	$(CC) $(CFLAGS) dist_on_sphere_and_azi_file.c $(ODIR)/stadis.o \
+	-o $(BDIR)/dist_on_sphere_and_azi_file $(LDFLAGS)
+
 $(BDIR)/banner: banner.c
 	$(CC) $(CFLAGS) banner.c -o $(BDIR)/banner $(LDFLAGS)
 
@@ -588,22 +592,22 @@ $(BDIR)/p_fisher: p_fisher.c
 $(BDIR)/p_student: p_student.c 
 	$(CC) $(CFLAGS) p_student.c  -I${HOME}/mylibs/numrec/ -o $(BDIR)/p_student $(LDFLAGS)
 
-$(BDIR)/pearson_corr: pearson_corr.c
-	$(CC) $(CFLAGS) pearson_corr.c -I${HOME}/mylibs/numrec/ \
+$(BDIR)/pearson_corr: pearson_corr.c $(ODIR)/correl_nr_util.o
+	$(CC) $(CFLAGS) pearson_corr.c $(ODIR)/correl_nr_util.o \
 	-o $(BDIR)/pearson_corr $(LDFLAGS)
 
-$(BDIR)/spear: spear.c spear_util.c
-	$(CC) $(CFLAGS) spear.c spear_util.c -I${HOME}/mylibs/numrec/ \
+$(BDIR)/spear: spear.c  $(ODIR)/correl_nr_util.o
+	$(CC) $(CFLAGS) spear.c   $(ODIR)/correl_nr_util.o -I${HOME}/mylibs/numrec/ \
 	-o $(BDIR)/spear $(LDFLAGS)
 
-$(BDIR)/bootstrap_spear: bootstrap_corr.c spear_util.c
-	$(CC) $(CFLAGS)  \
-	bootstrap_corr.c spear_util.c -I${HOME}/mylibs/numrec/ \
+$(BDIR)/bootstrap_spear: bootstrap_corr.c  $(ODIR)/correl_nr_util.o
+	$(CC) $(CFLAGS)  $(ODIR)/correl_nr_util.o \
+	bootstrap_corr.c  -I${HOME}/mylibs/numrec/ \
 	-o $(BDIR)/bootstrap_spear $(LDFLAGS)
 
-$(BDIR)/bootstrap_corr: bootstrap_corr.c spear_util.c
-	$(CC) $(CFLAGS)  -DUSE_PEARSON \
-	bootstrap_corr.c spear_util.c -I${HOME}/mylibs/numrec/ \
+$(BDIR)/bootstrap_corr: bootstrap_corr.c $(ODIR)/correl_nr_util.o
+	$(CC) $(CFLAGS)  -DUSE_PEARSON $(ODIR)/correl_nr_util.o \
+	bootstrap_corr.c  -I${HOME}/mylibs/numrec/ \
 	-o $(BDIR)/bootstrap_corr $(LDFLAGS)
 
 $(BDIR)/period: period.c $(MT_LIBS)
