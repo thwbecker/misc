@@ -72,7 +72,7 @@ PROGS2 = \
 	$(BDIR)/fitxyee $(BDIR)/p_fisher $(BDIR)/p_student \
 	$(BDIR)/pearson_corr $(BDIR)/bootstrap_corr $(BDIR)/bootstrap_spear \
 	$(BDIR)/spear $(BDIR)/period $(BDIR)/student  \
-	$(BDIR)/fit_plane $(BDIR)/averageirrdata_spline \
+	$(BDIR)/averageirrdata_spline \
 	$(BDIR)/averageirrdata_linear $(BDIR)/uudecode \
 	$(BDIR)/averageirrdata_quad \
 	$(BDIR)/averageirrdata_cubic $(BDIR)/banner \
@@ -81,7 +81,7 @@ PROGS2 = \
 	$(BDIR)/pca $(BDIR)/polyfit $(BDIR)/plume_detect  $(BDIR)/plume_detect_d \
 	$(BDIR)/paste_bin $(BDIR)/dist_on_sphere_and_azi $(BDIR)/dist_on_sphere_and_azi_file \
 	$(BDIR)/cholesky_lsq $(BDIR)/svd_lsq $(BDIR)/svd_lsq_s $(BDIR)/ftest  
-#	$(BDIR)/solve_hom3d 
+#	$(BDIR)/solve_hom3d  $(BDIR)/fit_plane 
 #	$(BDIR)/iaspei91 $(BDIR)/mpi_example
 
 #$(BDIR)/poly_avg_splitting \
@@ -93,7 +93,9 @@ INTACTGEOOBJS =	\
 	$(HOME)/progs/src/interact/objects/geometry.o \
 	$(HOME)/progs/src/interact/objects/llgeo.o \
 	$(HOME)/progs/src/interact/objects/mysincos.o \
-	$(HOME)/progs/src/interact/objects/fit_plane.o
+	$(HOME)/progs/src/interact/objects/fit_plane.o \
+	$(HOME)/progs/src/interact/objects/eval_okada.o \
+	$(HOME)/progs/src/interact/objects/eval_triangle_nw.o
 
 DEFS = -DCOMP_PRECISION=double
 
@@ -126,7 +128,7 @@ cproto:
 $(BDIR)/fit_plane: $(ODIR)/fit_plane.o $(INTACTGEOOBJS) \
 	$(HOME)/progs/src/interact/interact.h \
 	$(HOME)/progs/src/interact/auto_proto.h 
-	$(CC) $(CFLAGS) $(ODIR)/fit_plane.o	\
+	$(CC) $(CFLAGS) $(ODIR)/fit_plane.o \
 		$(INTACTGEOOBJS) -o $(BDIR)/fit_plane \
 		$(MATHLIBS) $(LDFLAGS) 
 
