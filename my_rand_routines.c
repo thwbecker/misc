@@ -82,7 +82,7 @@ int main(int argc,char **argv)
     idum = (long) i;
     break;
   }
-#ifdef TGR
+#if ((defined TGR)||(defined TGR_MAG))
     /* 
 
        tapered GR distribution
