@@ -3,13 +3,15 @@
 /* get moment in Nm from magnitude */
 double moment(double mag)
 {
-  return pow(10.,3./2.*mag + 9.1);
+  const double three_over_two = 3./2.;
+  return pow(10.,three_over_two * mag + 9.1);
 }
 /* get magnitude from moment in Nm */
 
 double magnitude(double M0)
 {
-  return 2./3.*(log10(M0)-9.1);
+  const double two_over_three = 2./3.;
+  return two_over_three *(log10(M0)-9.1);
 }
 
 

@@ -25,7 +25,8 @@ POWERLAW:            bounded powerlaw
 
 LONLAT: on surface of sphere
 
-TGR:                 tapered Gutenberg Richter as in Kagan (GJI, 2002)
+TGR:                 tapered Gutenberg Richter as in Kagan (GJI, 2002), output in moment
+TGR_MAG:                 tapered Gutenberg Richter as in Kagan (GJI, 2002), output in magnitude with 0.01 sampling
 
 based on numerical recipes code for uniformly distributed random
 
@@ -42,7 +43,7 @@ int main(int argc,char **argv)
 {
   long idum = -1;
   int n,i,k;
-  double a=0.0,b=1.0,r;
+  double a=0.0,b=1.0,r,dbl_n;
 #ifdef GAUSS_VEL
   double sx,sy,rxy,e1,e2,alpha,x[2],xp[2],
     sin_alpha,cos_alpha;
@@ -53,7 +54,7 @@ int main(int argc,char **argv)
   double x0=0,x1=1.0;
   double xn1,xn2,xfac1,xfac2;
 #endif
-#ifdef TGR
+# if ((defined TGR) || (defined TGR_MAG))
   /* for magnitudes */
   double beta = 0.658,mag_t=5.4,mag_cm=8.03,m1,m2,b1,
     m_t,m_cm;
@@ -71,7 +72,8 @@ int main(int argc,char **argv)
     break;
   }
   case 2:{
-    sscanf(argv[1],"%i",&n);
+    sscanf(argv[1],"%lf",&dbl_n);
+    n = (int) dbl_n;
     break;
   }
   case 3:{			/* number and seed */
@@ -152,7 +154,7 @@ int main(int argc,char **argv)
     fprintf(stderr,"%s n(1) seed(-1) [a(%g) b(%g)]\n",argv[0],a,b);
     fprintf(stderr,"writes n uniformly distributed random numbers between a and b to stdout\n");
 #endif
-#ifdef TGR
+#if ((defined TGR)||(defined TGR_MAG))
     fprintf(stderr,"%s n(1) seed(-1) [beta (%g) mag_t (%g) mag_cm (%g)]\n",argv[0],beta,mag_t,mag_cm);
     fprintf(stderr,"writes a tapered GR distribution with completeness mag_t and corner  mag_cm to stdout\n");
 #endif
@@ -213,9 +215,14 @@ int main(int argc,char **argv)
   for(i=0;i<n;i++)
     fprintf(stdout,"%20.15lf\n",(double)powl((long double)(xfac1*GEN_TO_USE(&idum) + xfac2),(long double)xn2));
 #endif
+#if((defined TGR)||(defined TGR_MAG))
 #ifdef TGR
-  fprintf(stderr,"%s: writing %i tapered GR  random nrs with seed %i, beta %g completeness mag_t %g mag_cm %g to stdout\n",
+  fprintf(stderr,"%s: writing %i tapered GR  random nrs with seed %i, beta %g compl mag_t %g mag_cm %g moments to stdout\n",
 	  argv[0],n,(int)idum,beta,mag_t,mag_cm);
+#else
+  fprintf(stderr,"%s: writing %i tapered GR  random nrs with seed %i, beta %g compl mag_t %g mag_cm %g magnitudes to stdout\n",
+	  argv[0],n,(int)idum,beta,mag_t,mag_cm);
+#endif
   GEN_TO_USE(&idum);   		/* init */
   m_t = moment(mag_t);		/* convert to moments */
   m_cm = moment(mag_cm);
@@ -223,7 +230,11 @@ int main(int argc,char **argv)
   for(i=0;i<n;i++){		/* see kagan  (2002) */
     m1 = m_t * pow(GEN_TO_USE(&idum),b1);
     m2 = m_t - m_cm * log(GEN_TO_USE(&idum));
+#ifdef TGR
     fprintf(stdout,"%.15e\n",(m1<m2)?(m1):(m2)); /* min(m1,m2) */
+#else
+    fprintf(stdout,"%.2f\n",(m1<m2)?(magnitude(m1)):(magnitude(m2))); /* min(m1,m2) */
+#endif
   }
 #endif
 #ifdef EXPONENTIAL
@@ -282,8 +293,8 @@ int main(int argc,char **argv)
   for(i=0;i < n;i++){
     do{
       /* pick two uniformly distributed random numbers in [-1;1] */
-      u = -1 + GEN_TO_USE(&idum)*2;
-      v = -1 + GEN_TO_USE(&idum)*2;
+      u = -1. + GEN_TO_USE(&idum)*2.;
+      v = -1. + GEN_TO_USE(&idum)*2.;
       s = u*u + v*v;		/* length has to be <= 1 */
       j += 2;			/* count the number of random numbers
 				   generated for testing purposes */
@@ -301,7 +312,7 @@ int main(int argc,char **argv)
       phi += 360.0;
     fprintf(stdout,"%20.12e %20.12e\n",phi,theta);
   }
-  fprintf(stderr,"%s: produced %i lon lat pairs from %i random numbers\n",argv[0],i,j);
+  fprintf(stderr,"%s: produced %i lon lat pairs from %i random numbers (%i rejected)\n",argv[0],i,j,j/2-i);
 #endif
 
 

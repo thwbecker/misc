@@ -51,7 +51,7 @@ PROGS1 =  $(BDIR)/prune_gps_data \
 	$(BDIR)/matrix2vector   $(BDIR)/lonlatpv2cv  $(BDIR)/geomean \
 	$(BDIR)/misfit  $(BDIR)/random_gauss  $(BDIR)/random \
 	$(BDIR)/random_lonlat  $(BDIR)/random_tensor $(BDIR)/random_power \
-	$(BDIR)/random_exp  $(BDIR)/extract_dens  $(BDIR)/random_tgr \
+	$(BDIR)/random_exp  $(BDIR)/extract_dens  $(BDIR)/random_tgr $(BDIR)/random_tgr_mag \
 	$(BDIR)/rtp2xyz $(BDIR)/cov_from_events $(BDIR)/random_gvel $(BDIR)/xyz2lonlatz $(BDIR)/randomize_simple_xyz \
 	$(BDIR)/simple_spline $(BDIR)/extract_bin  $(BDIR)/extract_bin_file  $(BDIR)/extract_bin_column \
 	 $(BDIR)/extract_bin_int $(BDIR)/spat_power_grid $(BDIR)/close2point \
@@ -505,6 +505,10 @@ $(BDIR)/random_tgr: $(ODIR)/random_tgr.o $(ODIR)/rand.o $(ODIR)/rotate.o $(ODIR)
 	$(CC) $(CFLAGS) $(ODIR)/rand.o $(ODIR)/rotate.o  $(ODIR)/momentmag.o \
 		$(ODIR)/random_tgr.o -o $(BDIR)/random_tgr $(LDFLAGS) -lm
 
+$(BDIR)/random_tgr_mag: $(ODIR)/random_tgr_mag.o $(ODIR)/rand.o $(ODIR)/rotate.o $(ODIR)/momentmag.o
+	$(CC) $(CFLAGS) $(ODIR)/rand.o $(ODIR)/rotate.o  $(ODIR)/momentmag.o \
+		$(ODIR)/random_tgr_mag.o -o $(BDIR)/random_tgr_mag $(LDFLAGS) -lm
+
 $(BDIR)/fit_tgr: $(ODIR)/momentmag.o $(ODIR)/fit_tgr.o
 	$(CC) $(CFLAGS) $(ODIR)/momentmag.o $(ODIR)/fit_tgr.o -o $(BDIR)/fit_tgr $(LDFLAGS) -lm
 
@@ -646,6 +650,9 @@ $(ODIR)/random_power.o: my_rand_routines.c
 
 $(ODIR)/random_tgr.o: my_rand_routines.c
 	$(CC) $(CFLAGS) -c my_rand_routines.c -DTGR -o $(ODIR)/random_tgr.o
+
+$(ODIR)/random_tgr_mag.o: my_rand_routines.c
+	$(CC) $(CFLAGS) -c my_rand_routines.c -DTGR_MAG -o $(ODIR)/random_tgr_mag.o
 
 $(ODIR)/random_exp.o: my_rand_routines.c
 	$(CC) $(CFLAGS) -c my_rand_routines.c -DEXPONENTIAL -o $(ODIR)/random_exp.o
